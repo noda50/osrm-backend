@@ -14,6 +14,10 @@
         We recommend this for better error messages around classes, otherwise the possible class names are infered automatically.
     - Infrastructure:
       - New file `.osrm.cell_metrics` created by `osrm-customize`.
+    - Bugfixes
+      - Fixed a bug that would result in unnecessary instructions, due to problems in suffix/prefix detection
+    - Guidance
+      - improved detection of obvious roads, leading to less miss-classifications. This affects both announcement/suppression of turns
 
 # 5.11.0
   - Changes from 5.10:
