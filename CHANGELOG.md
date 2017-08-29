@@ -14,6 +14,8 @@
         We recommend this for better error messages around classes, otherwise the possible class names are infered automatically.
     - Infrastructure:
       - New file `.osrm.cell_metrics` created by `osrm-customize`.
+    - Node.js Bindings:
+      - Exposes `use_threads_number=Number` parameter of `EngineConfig` to limit a number of threads in a TBB internal pool
 
 # 5.11.0
   - Changes from 5.10:
