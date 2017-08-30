@@ -889,6 +889,30 @@ void LuaScriptingContext::ProcessNode(const osmium::Node &node, ExtractionNode &
     }
 }
 
+namespace
+{
+// boost::variant visitor that inserts a key-value pair in a Lua table
+struct table_setter : public boost::static_visitor<>
+{
+    table_setter(sol::table &table, const std::string &key) : table(table), key(key) {}
+    template <typename T> void operator()(const T &value) const { table.set(key, value); }
+    void operator()(const boost::blank &) const { /* ignore */}
+
+    sol::table &table;
+    const std::string &key;
+};
+
+// Converts a properties map into a Lua table
+sol::table toLua(sol::state &state, const LocationDependentData::properties_t properties)
+{
+    auto table = sol::table(state, sol::create);
+    std::for_each(properties.begin(), properties.end(), [&table](const auto &property) {
+        boost::apply_visitor(table_setter(table, property.first), property.second);
+    });
+    return table;
+}
+}
+
 void LuaScriptingContext::ProcessWay(const osmium::Way &way, ExtractionWay &result)
 {
     BOOST_ASSERT(state.lua_state() != nullptr);
@@ -896,7 +920,14 @@ void LuaScriptingContext::ProcessWay(const osmium::Way &way, ExtractionWay &resu
     switch (api_version)
     {
     case 2:
-        way_function(profile_table, way, result, location_dependent_data(state, way));
+        if (location_dependent_data.empty())
+        {
+            way_function(profile_table, way, result);
+        }
+        else
+        {
+            way_function(profile_table, way, result, toLua(state, location_dependent_data(way)));
+        }
         break;
     case 1:
     case 0:
