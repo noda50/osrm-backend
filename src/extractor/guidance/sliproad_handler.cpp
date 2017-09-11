@@ -493,7 +493,17 @@ operator()(const NodeID /*nid*/, const EdgeID source_edge_id, Intersection inter
                 continue;
             }
 
-            if (node_based_graph.GetTarget(candidate_road.eid) == main_road_intersection->node)
+            // Check that the cross-road `candidate_road_target` that starts at `d` ends at
+            // main intersection node `c` or has a common node `e` with a cross-road from `c`
+            // a ... b .... c                a ... b .... c
+            //       `      .                      `      .
+            //         `    .                        `    e...
+            //           `  .                          `  .
+            //              d                             d
+            //
+            const auto candidate_road_target = node_based_graph.GetTarget(candidate_road.eid);
+            if ((candidate_road_target == main_road_intersection->node) ||
+                (candidate_road_target == node_based_graph.GetTarget(crossing_road.eid)))
             {
                 sliproad.instruction.type = TurnType::Sliproad;
                 sliproad_found = true;
